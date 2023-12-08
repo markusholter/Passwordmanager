@@ -1,5 +1,3 @@
-#Brukerfilen
-Users.txt
+#Ignorer tekstfiler
+*.txt
 
-#Passordfilen
-Passord.txt
