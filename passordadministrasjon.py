@@ -28,5 +28,6 @@ def getPassword(passordfil):
     if password == "":
         print("No service with that name found!")
     else:
-        print("Your password is:\n", password)
+        print("Your password is:")
+        print(password)
     print()

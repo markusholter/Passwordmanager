@@ -1,3 +1,5 @@
 #Ignorer tekstfiler
 *.txt
 
+#Ignorer pycache
+__pycache__/
