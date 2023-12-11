@@ -1,7 +1,6 @@
 from kontrollerInterface import kontrollerInterface
 import os
 from hashlib import sha256
-from Crypto.Random import get_random_bytes
 from string import ascii_lowercase
 from random import choice
 
