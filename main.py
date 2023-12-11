@@ -1,10 +1,9 @@
-import os
 from hashlib import pbkdf2_hmac, sha256
 from brukeradministrasjon import getUser, createUser
 from passordadministrasjon import addPassword, getPassword
 
 
-def drift():
+def drift(masterPasswd):
     while True:
         print("What do you want to do?")
         print("0. Exit")
@@ -14,15 +13,15 @@ def drift():
         print()
         if inp == "0": break
         elif inp == "1":
-            addPassword(FILNAVN)
+            addPassword(FILNAVN, masterPasswd)
         elif inp == "2":
-            getPassword(FILNAVN)
+            getPassword(FILNAVN, masterPasswd)
         else:
             print("Not a thing!")
 
 
 
-def main():
+def loggInn():
     print("Do you want to log in or create a user?")
     print("1. Create new user")
     print("*. Log in")
@@ -36,10 +35,10 @@ def main():
 
     if user == None: return
 
-    drift()
+    drift(password)
     
 
 if __name__ == "__main__":
     FILNAVN = "Passord.txt"
     BRUKERE = "Users.txt"
-    main()
+    loggInn()
