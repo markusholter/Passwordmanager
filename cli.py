@@ -82,11 +82,3 @@ class Cli(kontrollerInterface):
         
         self.masterPasswd = password
         print("You are logged in!")
-
-    #Override-metoder:
-
-    def output(self, output):
-        print(output)
-
-    def getInput(self, question):
-        return input(question)
