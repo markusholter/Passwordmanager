@@ -8,10 +8,11 @@ class Cli(kontrollerInterface):
         self.BRUKERE = brukere
         self.BA = Brukeradministrasjon(self)
         self.PA = Passordadministrasjon(self)
+        self.masterPasswd = ""
         self.loggInn()
 
 
-    def drift(self, masterPasswd):
+    def drift(self):
         while True:
             print()
             print("What do you want to do?")
@@ -22,13 +23,26 @@ class Cli(kontrollerInterface):
             print()
             if inp == "0": break
             elif inp == "1":
-                self.PA.addPassword(self.FILNAVN, masterPasswd)
+                self.addPassword()
             elif inp == "2":
-                self.PA.getPassword(self.FILNAVN, masterPasswd)
+                self.getPassword()
             else:
                 print("Not a thing!")
 
+    def addPassword(self):
+        name = input("Write the name of the service: ")
+        newPassword = input("Write the new password here: ").encode()
+        if self.PA.addPassword(self.FILNAVN, self.masterPasswd, name, newPassword):
+            print("Password for " + name + " is now added!")
 
+    def getPassword(self):
+        name = input("Write the name of the service: ")
+        password = self.PA.getPassword(self.FILNAVN, self.masterPasswd, name)
+        if password:
+            print("Your password is:")
+            print(password)
+        else:
+            print("No service with that name found!")
 
     def loggInn(self):
         print("Do you want to log in or create a user?")
@@ -44,7 +58,8 @@ class Cli(kontrollerInterface):
 
         if user == None: return
 
-        self.drift(password)
+        self.masterPasswd = password
+        self.drift()
 
 
     #Override-metoder:

@@ -10,16 +10,14 @@ class Passordadministrasjon:
         self.kont = kontroller
 
 
-    def addPassword(self, passordfil, passwd):
-        name = self.kont.getInput("Write the name of the service: ")
-        newPassword = self.kont.getInput("Write the new password here: ").encode()
+    def addPassword(self, passordfil, masterPasswd, name, newPassword):
 
         if not os.path.exists(passordfil):
             with open(passordfil, "w") as f:
                 f.write("name,password,tag,nonce,salt\n")
 
         salt = get_random_bytes(16) # Litt salt må til
-        key = scrypt(passwd, salt, 16, 2**14, 8, 1) # Nøkkel som skal brukes til krypteringen av passordet
+        key = scrypt(masterPasswd, salt, 16, 2**14, 8, 1) # Nøkkel som skal brukes til krypteringen av passordet
         cipher = AES.new(key, AES.MODE_EAX) # Cipher til å kryptere
         cipherpass, tag = cipher.encrypt_and_digest(newPassword) # Krypteringsdel
 
@@ -32,11 +30,10 @@ class Passordadministrasjon:
         with open(passordfil, "a") as f:
             f.write(name + "," + cipherpass + "," + tag + "," + nonce + "," + salt + "\n")
 
-        self.kont.output("Password for " + name + " is now added!")
+        return True
 
 
-    def getPassword(self, passordfil, masterPasswd):
-        name = self.kont.getInput("Write the name of the service: ")
+    def getPassword(self, passordfil, masterPasswd, name):
         password = ""
         with open(passordfil, "r") as f:
             for line in f:
@@ -45,9 +42,8 @@ class Passordadministrasjon:
                     password, tag, nonce, salt = [x for x in line[1:]]
                     break
         
-        if password == "":
-            self.kont.output("No service with that name found!")
-            return
+        if not password:
+            return False
         
         # Konverterer til bytes:
         password = b64decode(password.encode())
@@ -60,5 +56,4 @@ class Passordadministrasjon:
         password = cipher.decrypt_and_verify(password, tag).decode()
 
 
-        self.kont.output("Your password is:")
-        self.kont.output(password)
+        return password
