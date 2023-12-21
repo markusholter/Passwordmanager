@@ -7,13 +7,10 @@ from random import choice
 LENSALT = 8
 
 class Brukeradministrasjon:
-    def __init__(self, kontroller: kontrollerInterface) -> None:
+    def __init__(self, kontroller: kontrollerInterface) -> bool:
         self.kont = kontroller
 
-    def getUser(self, brukerfil):    
-        user = self.kont.getInput("Type your username: ")
-        passwd = self.kont.getInput("Type your password: ")
-
+    def getUser(self, brukerfil, user, passwd):    
         with open(brukerfil, "r") as f:
             for line in f:
                 line = line.strip().split(",")
@@ -21,35 +18,24 @@ class Brukeradministrasjon:
 
                 salt = line[2]
                 hpasswd = sha256((passwd + salt).encode()).hexdigest()
-                if line[1] != hpasswd:
-                    self.kont.output("Wrong password! ")
-                    return None, None
                 
                 if line[1] == hpasswd:
-                    self.kont.output("You are logged in!")
-                    return user, passwd
+                    return True
                 
-        self.kont.output("Found no username like that!")
-        return None, None
+        return False
 
+    def checkIfTaken(self, brukerfil, user):
+        with open(brukerfil, "r") as f:
+            usernames = [name.strip().split(",")[0] for name in f.readlines()[1:]]
+        return user in usernames
 
-
-    def createUser(self, brukerfil):
+    def createUser(self, brukerfil, user, passwd):
         if not os.path.exists(brukerfil):
             with open(brukerfil, "w") as f:
                 f.write("user,hpasswd,salt\n")
 
         salt = "".join(choice(ascii_lowercase) for _ in range(LENSALT))
+        hpasswd = sha256((passwd + salt).encode()).hexdigest()
 
-        with open(brukerfil, "r+") as f:
-            usernames = [name.strip().split(",")[0] for name in f.readlines()[1:]]
-            user = self.kont.getInput("Type your username: ")
-            while user in usernames: 
-                user = self.kont.getInput("That username is taken! Try another: ")
-
-            passwd = self.kont.getInput("Type the password you want to use: ")
-            hpasswd = sha256((passwd + salt).encode()).hexdigest()
+        with open(brukerfil, "a") as f:
             f.write(user + "," + hpasswd + "," + salt + "\n")
-
-        self.kont.output("User added!")
-        return user, passwd

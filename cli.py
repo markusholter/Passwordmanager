@@ -1,10 +1,11 @@
 from kontrollerInterface import kontrollerInterface
 from brukeradministrasjon import Brukeradministrasjon
 from passordadministrasjon import Passordadministrasjon
+import sys
 
 class Cli(kontrollerInterface):
     def __init__(self, filnavn, brukere) -> None:
-        self.FILNAVN = filnavn
+        self.PASSORDFIL = filnavn
         self.BRUKERE = brukere
         self.BA = Brukeradministrasjon(self)
         self.PA = Passordadministrasjon(self)
@@ -32,17 +33,18 @@ class Cli(kontrollerInterface):
     def addPassword(self):
         name = input("Write the name of the service: ")
         newPassword = input("Write the new password here: ").encode()
-        if self.PA.addPassword(self.FILNAVN, self.masterPasswd, name, newPassword):
+        if self.PA.addPassword(self.PASSORDFIL, self.masterPasswd, name, newPassword):
             print("Password for " + name + " is now added!")
 
     def getPassword(self):
         name = input("Write the name of the service: ")
-        password = self.PA.getPassword(self.FILNAVN, self.masterPasswd, name)
+        password = self.PA.getPassword(self.PASSORDFIL, self.masterPasswd, name)
         if password:
             print("Your password is:")
             print(password)
         else:
             print("No service with that name found!")
+
 
     def loggInn(self):
         print("Do you want to log in or create a user?")
@@ -52,15 +54,34 @@ class Cli(kontrollerInterface):
         print()
 
         if inp == "1":
-            user, password = self.BA.createUser(self.BRUKERE)
+            self.createUser()
         else:
-            user, password = self.BA.getUser(self.BRUKERE)
+            self.getUser()
 
-        if user == None: return
-
-        self.masterPasswd = password
         self.drift()
 
+    def createUser(self):
+        user = input("Type your username: ")
+        while self.BA.checkIfTaken(self.BRUKERE, user):
+            user = input("That username is taken! Try another: ")
+        
+        password = input("Type the password you want to use: ")
+        self.BA.createUser(self.BRUKERE, user, password)
+        print("User added!")
+        self.masterPasswd = password
+
+    def getUser(self):
+        user = input("Type your username: ")
+        if not self.BA.checkIfTaken(self.BRUKERE, user):
+            print("Found no username like that.")
+            sys.exit(-1)
+        
+        password = input("Type your password: ")
+        while not self.BA.getUser(self.BRUKERE, user, password):
+            password = input("Wrong password! Try again: ")
+        
+        self.masterPasswd = password
+        print("You are logged in!")
 
     #Override-metoder:
 
