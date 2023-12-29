@@ -1,14 +1,13 @@
-from kontrollerInterface import kontrollerInterface
 from brukeradministrasjon import Brukeradministrasjon
 from passordadministrasjon import Passordadministrasjon
 import sys
 
-class Cli(kontrollerInterface):
+class Cli():
     def __init__(self, filnavn, brukere) -> None:
         self.PASSORDFIL = filnavn
         self.BRUKERE = brukere
-        self.BA = Brukeradministrasjon(self)
-        self.PA = Passordadministrasjon(self)
+        self.BA = Brukeradministrasjon()
+        self.PA = Passordadministrasjon()
         self.masterPasswd = ""
         self.loggInn()
 

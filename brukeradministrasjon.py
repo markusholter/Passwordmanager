@@ -1,4 +1,3 @@
-from kontrollerInterface import kontrollerInterface
 import os
 from hashlib import sha256
 from string import ascii_lowercase
@@ -7,9 +6,6 @@ from random import choice
 LENSALT = 8
 
 class Brukeradministrasjon:
-    def __init__(self, kontroller: kontrollerInterface) -> bool:
-        self.kont = kontroller
-
     def getUser(self, brukerfil, user, passwd):    
         with open(brukerfil, "r") as f:
             for line in f:
