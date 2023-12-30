@@ -6,11 +6,11 @@ from base64 import b64decode, b64encode
 
 class Passordadministrasjon:
 
-    def addPassword(self, passordfil, masterPasswd, name, newPassword):
+    def addPassword(self, passordfil, masterPasswd, name, username, newPassword):
 
         if not os.path.exists(passordfil):
             with open(passordfil, "w") as f:
-                f.write("name,password,tag,nonce,salt\n")
+                f.write("name,username,password,tag,nonce,salt\n")
 
         salt = get_random_bytes(16) # Litt salt må til
         key = scrypt(masterPasswd, salt, 16, 2**14, 8, 1) # Nøkkel som skal brukes til krypteringen av passordet
@@ -24,7 +24,7 @@ class Passordadministrasjon:
         salt = b64encode(salt).decode()
 
         with open(passordfil, "a") as f:
-            f.write(name + "," + cipherpass + "," + tag + "," + nonce + "," + salt + "\n")
+            f.write(name + "," + username + "," + cipherpass + "," + tag + "," + nonce + "," + salt + "\n")
 
         return True
 
@@ -35,7 +35,7 @@ class Passordadministrasjon:
             for line in f:
                 line = line.strip().split(",")
                 if line[0].lower() == name.lower():
-                    password, tag, nonce, salt = [x for x in line[1:]]
+                    username, password, tag, nonce, salt = [x for x in line[1:]]
                     break
         
         if not password:

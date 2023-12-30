@@ -1,14 +1,11 @@
-from brukeradministrasjon import Brukeradministrasjon
-from passordadministrasjon import Passordadministrasjon
+from kontroller import Kontroller
+
 import sys
 
 class Cli():
-    def __init__(self, brukere) -> None:
+    def __init__(self, brukere, kontroller: Kontroller) -> None:
         self.BRUKERE = brukere
-        self.passordfil = None
-        self.BA = Brukeradministrasjon()
-        self.PA = Passordadministrasjon()
-        self.masterPasswd = ""
+        self.KONTROLLER = kontroller
         self.loggInn()
 
 
@@ -31,13 +28,14 @@ class Cli():
 
     def addPassword(self):
         name = input("Write the name of the service: ")
+        username = input("Write your username: ")
         newPassword = input("Write the new password here: ").encode()
-        if self.PA.addPassword(self.passordfil, self.masterPasswd, name, newPassword):
+        if self.KONTROLLER.addPassword(name, username, newPassword):
             print("Password for " + name + " is now added!")
 
     def getPassword(self):
         name = input("Write the name of the service: ")
-        password = self.PA.getPassword(self.passordfil, self.masterPasswd, name)
+        password = self.KONTROLLER.getPassword(name)
         if password:
             print("Your password is:")
             print(password)
@@ -54,6 +52,9 @@ class Cli():
 
         if inp == "1":
             self.createUser()
+            self.loggInn()
+            print()
+            return
         else:
             self.getUser()
 
@@ -61,23 +62,23 @@ class Cli():
 
     def createUser(self):
         user = input("Type your username: ")
-        while self.BA.checkIfTaken(self.BRUKERE, user):
+        while self.KONTROLLER.checkIfTaken(user):
             user = input("That username is taken! Try another: ")
         
         password = input("Type the password you want to use: ")
-        self.BA.createUser(self.BRUKERE, user, password)
+        self.KONTROLLER.createUser(user, password)
         print("User added!")
         self.masterPasswd = password
         self.passordfil = user + ".txt"
 
     def getUser(self):
         user = input("Type your username: ")
-        if not self.BA.checkIfTaken(self.BRUKERE, user):
+        if not self.KONTROLLER.checkIfTaken(user):
             print("Found no username like that.")
             sys.exit(-1)
         
         password = input("Type your password: ")
-        while not self.BA.getUser(self.BRUKERE, user, password):
+        while not self.KONTROLLER.getUser(user, password):
             password = input("Wrong password! Try again: ")
         
         self.masterPasswd = password

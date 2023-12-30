@@ -105,6 +105,8 @@ class MainWindow(QMainWindow):
         self.my_layout = QGridLayout()
         self.mainWidget = QWidget()
 
+        
+
         self.mainWidget.setLayout(self.my_layout)
         self.setCentralWidget(self.mainWidget)
 

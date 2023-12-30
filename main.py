@@ -8,8 +8,9 @@ def startGui():
 
 
 def startCli():
-    Cli(brukere)
+    kontroller = Kontroller(brukere)
+    Cli(brukere, kontroller)
 
 if __name__ == "__main__":
     brukere = "Users.txt"
-    startGui()
+    startCli()
