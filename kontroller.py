@@ -2,12 +2,12 @@ from brukeradministrasjon import Brukeradministrasjon
 from passordadministrasjon import Passordadministrasjon
 
 class Kontroller:
-    def __init__(self, passordfil, brukerfil):
-        self.PASSORDFIL = passordfil
+    def __init__(self, brukerfil):
         self.BRUKERFIL = brukerfil
         self.BA = Brukeradministrasjon()
         self.PA = Passordadministrasjon()
         self.user = None
+        self.passordfil = None
         self.master_password = None
 
     def checkIfTaken(self, user):
@@ -18,6 +18,7 @@ class Kontroller:
 
         if worked:
             self.user = user
+            self.passordfil = user + ".txt"
             self.master_password = master_password
             print(user, master_password)
         

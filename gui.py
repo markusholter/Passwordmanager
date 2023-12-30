@@ -9,10 +9,8 @@ from PyQt6.QtGui import QAction
 from PyQt6.QtCore import Qt
 
 class MainWindow(QMainWindow):
-    def __init__(self, passordfil, brukerfil, kontroller):
+    def __init__(self, kontroller):
         super().__init__()
-        self.PASSORDFIL = passordfil
-        self.BRUKERFIL = brukerfil
         self.KONTROLLER: Kontroller = kontroller
         self.my_layout = QGridLayout()
         self.user_line = QLineEdit()
@@ -66,11 +64,11 @@ class MainWindow(QMainWindow):
         master_password = self.master_password_line.text()
 
         if self.KONTROLLER.checkIfTaken(user):
-            self.addLoginError("Username is taken", error=True)
+            self.addLoginMessage("Username is taken", error=True)
             return
     
         self.KONTROLLER.createUser(user, master_password)
-        self.addLoginError("New user created!")
+        self.addLoginMessage("New user created!")
         self.master_password_line.clear()
 
 
@@ -79,18 +77,18 @@ class MainWindow(QMainWindow):
         master_password = self.master_password_line.text()
 
         if not self.KONTROLLER.checkIfTaken( user):
-            self.addLoginError("Wrong username", error=True)
+            self.addLoginMessage("Wrong username", error=True)
             return
         
         if not self.KONTROLLER.getUser(user, master_password):
-            self.addLoginError("Wrong password", error=True)
+            self.addLoginMessage("Wrong password", error=True)
             self.master_password_line.clear()
             return
 
         self.buildManager()
 
 
-    def addLoginError(self, string, error=False):
+    def addLoginMessage(self, string, error=False):
         message = self.my_layout.itemAtPosition(0, 2)
         if message:
             message = message.widget()
@@ -104,11 +102,15 @@ class MainWindow(QMainWindow):
 
 
     def buildManager(self):
-        print("Building")
+        self.my_layout = QGridLayout()
+        self.mainWidget = QWidget()
+
+        self.mainWidget.setLayout(self.my_layout)
+        self.setCentralWidget(self.mainWidget)
 
 
-def start(passordfil, brukerfil, kontroller):
+def start(kontroller):
     app = QApplication([])
-    w = MainWindow(passordfil, brukerfil, kontroller)
+    w = MainWindow(kontroller)
     w.show()
     app.exec()

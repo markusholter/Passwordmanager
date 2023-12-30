@@ -3,9 +3,9 @@ from passordadministrasjon import Passordadministrasjon
 import sys
 
 class Cli():
-    def __init__(self, filnavn, brukere) -> None:
-        self.PASSORDFIL = filnavn
+    def __init__(self, brukere) -> None:
         self.BRUKERE = brukere
+        self.passordfil = None
         self.BA = Brukeradministrasjon()
         self.PA = Passordadministrasjon()
         self.masterPasswd = ""
@@ -32,12 +32,12 @@ class Cli():
     def addPassword(self):
         name = input("Write the name of the service: ")
         newPassword = input("Write the new password here: ").encode()
-        if self.PA.addPassword(self.PASSORDFIL, self.masterPasswd, name, newPassword):
+        if self.PA.addPassword(self.passordfil, self.masterPasswd, name, newPassword):
             print("Password for " + name + " is now added!")
 
     def getPassword(self):
         name = input("Write the name of the service: ")
-        password = self.PA.getPassword(self.PASSORDFIL, self.masterPasswd, name)
+        password = self.PA.getPassword(self.passordfil, self.masterPasswd, name)
         if password:
             print("Your password is:")
             print(password)
@@ -68,6 +68,7 @@ class Cli():
         self.BA.createUser(self.BRUKERE, user, password)
         print("User added!")
         self.masterPasswd = password
+        self.passordfil = user + ".txt"
 
     def getUser(self):
         user = input("Type your username: ")
@@ -81,3 +82,4 @@ class Cli():
         
         self.masterPasswd = password
         print("You are logged in!")
+        self.passordfil = user + ".txt"
