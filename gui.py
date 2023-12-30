@@ -1,6 +1,5 @@
-from brukeradministrasjon import Brukeradministrasjon
-from passordadministrasjon import Passordadministrasjon
 import sys
+from kontroller import Kontroller
 
 from PyQt6.QtWidgets import (QApplication, QMainWindow, QHBoxLayout, 
                              QLineEdit, QPushButton, QWidget,
@@ -10,25 +9,28 @@ from PyQt6.QtGui import QAction
 from PyQt6.QtCore import Qt
 
 class MainWindow(QMainWindow):
-    def __init__(self):
+    def __init__(self, passordfil, brukerfil, kontroller):
         super().__init__()
+        self.PASSORDFIL = passordfil
+        self.BRUKERFIL = brukerfil
+        self.KONTROLLER: Kontroller = kontroller
+        self.my_layout = QGridLayout()
+        self.user_line = QLineEdit()
+        self.master_password_line = QLineEdit()
+        self.mainWidget = QWidget()
 
         self.setWindowTitle("Passwordmanager")
 
-        self.layout = QGridLayout()
-
         user_instruction = QLabel("Username:")
-        self.layout.addWidget(user_instruction, 1, 1)
+        self.my_layout.addWidget(user_instruction, 1, 1)
 
         user_instruction = QLabel("Password:")
-        self.layout.addWidget(user_instruction, 2, 1)
+        self.my_layout.addWidget(user_instruction, 2, 1)
 
-        user = QLineEdit()
-        self.layout.addWidget(user, 1, 2)
+        self.my_layout.addWidget(self.user_line, 1, 2)
 
-        master_password = QLineEdit()
-        master_password.setEchoMode(QLineEdit.EchoMode.Password)
-        self.layout.addWidget(master_password, 2, 2)
+        self.master_password_line.setEchoMode(QLineEdit.EchoMode.Password)
+        self.my_layout.addWidget(self.master_password_line, 2, 2)
 
 
         buttons = QHBoxLayout()
@@ -37,19 +39,18 @@ class MainWindow(QMainWindow):
 
         register.clicked.connect(self.register)
         log_in.clicked.connect(self.log_in)
-        master_password.returnPressed.connect(self.log_in)
-        user.returnPressed.connect(self.log_in)
+        self.master_password_line.returnPressed.connect(self.log_in) # For at man skal kunne trykke enter fo å logge inn.
+        self.user_line.returnPressed.connect(self.log_in)
 
 
         buttons.addWidget(register)
         buttons.addWidget(log_in)
 
-        self.layout.addLayout(buttons, 3, 2)
+        self.my_layout.addLayout(buttons, 3, 2)
 
-        main = QWidget()
-        main.setLayout(self.layout)
+        self.mainWidget.setLayout(self.my_layout)
 
-        self.setCentralWidget(main)
+        self.setCentralWidget(self.mainWidget)
 
 
     def setMinByPercentage(self, w, h):
@@ -59,18 +60,55 @@ class MainWindow(QMainWindow):
         minh = int(screenGeometry.height() * h)
         self.setMinimumSize(minw, minh)
 
+
     def register(self):
-        print("Reg")
+        user = self.user_line.text()
+        master_password = self.master_password_line.text()
+
+        if self.KONTROLLER.checkIfTaken(user):
+            self.addLoginError("Username is taken", error=True)
+            return
+    
+        self.KONTROLLER.createUser(user, master_password)
+        self.addLoginError("New user created!")
+        self.master_password_line.clear()
+
 
     def log_in(self):
-        print("Log")
+        user = self.user_line.text()
+        master_password = self.master_password_line.text()
 
-    def addLoginError(self):
-        error_message = QLabel()
-        self.layout.addWidget(error_message, 0, 2, Qt.AlignmentFlag.AlignCenter)
+        if not self.KONTROLLER.checkIfTaken( user):
+            self.addLoginError("Wrong username", error=True)
+            return
+        
+        if not self.KONTROLLER.getUser(user, master_password):
+            self.addLoginError("Wrong password", error=True)
+            self.master_password_line.clear()
+            return
+
+        self.buildManager()
 
 
-app = QApplication([])
-w = MainWindow()
-w.show()
-app.exec()
+    def addLoginError(self, string, error=False):
+        message = self.my_layout.itemAtPosition(0, 2)
+        if message:
+            message = message.widget()
+        else:
+            message = QLabel()
+            self.my_layout.addWidget(message, 0, 2, Qt.AlignmentFlag.AlignCenter)
+
+        message.setText(string)
+        if error: message.setStyleSheet("color: red;")
+        else: message.setStyleSheet("")
+
+
+    def buildManager(self):
+        print("Building")
+
+
+def start(passordfil, brukerfil, kontroller):
+    app = QApplication([])
+    w = MainWindow(passordfil, brukerfil, kontroller)
+    w.show()
+    app.exec()

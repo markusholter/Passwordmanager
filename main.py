@@ -1,6 +1,9 @@
 from cli import Cli
+from kontroller import Kontroller
+from gui import start
 
 if __name__ == "__main__":
     filnavn = "Passord.txt"
     brukere = "Users.txt"
-    klient = Cli(filnavn, brukere)
+    klient = Kontroller(filnavn, brukere)
+    start(filnavn, brukere, klient)
