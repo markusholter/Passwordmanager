@@ -18,6 +18,7 @@ class MainWindow(QMainWindow):
         self.user_line = QLineEdit()
         self.master_password_line = QLineEdit()
         self.main_widget = QWidget()
+        self.under_widget = QWidget()
         self.services = {}
         self.toolbar = None
 
@@ -55,19 +56,48 @@ class MainWindow(QMainWindow):
 
         self.setCentralWidget(self.main_widget)
 
-
-    def buildManager(self):
-        self.main_widget = QScrollArea()
-        self.my_layout = QGridLayout(self.main_widget)
-        under_widget = QWidget()
+    def loggedIn(self):
         self.services = self.KONTROLLER.getNamesAndUsernames()
         self.toolbar = QToolBar("Toolbar")
+        self.buildManager()
+        self.resize(self.under_widget.width() + 20, self.under_widget.height() + self.toolbar.heightMM())
+
+        self.toolbar.setMovable(False)
+        
+        add_item = QPushButton("Add item")
+        add_item.clicked.connect(self.addItem)
+        self.toolbar.addWidget(add_item)
+
+        self.toolbar.addSeparator()
+
+        search_label = QLabel("Search: ")
+        self.toolbar.addWidget(search_label)
+
+        search = QLineEdit()
+        search.textEdited.connect(self.search)
+        self.toolbar.addWidget(search)
+
+        self.addToolBar(self.toolbar)
+
+    def buildManager(self, search=""):
+        self.main_widget = QScrollArea()
+        self.my_layout = QGridLayout(self.main_widget)
+        self.under_widget = QWidget()
+        services = self.KONTROLLER.getNamesAndUsernames(search)
 
         self.my_layout.setHorizontalSpacing(5)
-        under_widget.setLayout(self.my_layout)
+        self.under_widget.setLayout(self.my_layout)
 
+        self.listServices(services)
+
+        self.main_widget.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+        self.main_widget.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAsNeeded)
+        self.main_widget.setWidget(self.under_widget)
+        self.setCentralWidget(self.main_widget)
+
+    def listServices(self, services):
         i = 0
-        for service in self.services:
+        for service in services:
             service_space = QVBoxLayout()
 
             q_service = QLabel(service)
@@ -79,7 +109,7 @@ class MainWindow(QMainWindow):
             q_service.setAlignment(Qt.AlignmentFlag.AlignBottom)
             service_space.addWidget(q_service)
 
-            username = QLineEdit(self.services[service])
+            username = QLineEdit(services[service])
             username.setStyleSheet("font-style: italic; background-color: transparent; border: 0px;")
             username.setMaximumWidth(200)
             font_metrics = QFontMetrics(username.font())
@@ -101,30 +131,6 @@ class MainWindow(QMainWindow):
             self.my_layout.addWidget(copy_password, i, 2)
 
             i += 1
-
-        self.main_widget.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
-        self.main_widget.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAsNeeded)
-        self.main_widget.setWidget(under_widget)
-        self.resize(under_widget.width() + 20, under_widget.height() + self.toolbar.heightMM())
-        self.setCentralWidget(self.main_widget)
-
-
-        self.toolbar.setMovable(False)
-        
-        add_item = QPushButton("Add item")
-        add_item.clicked.connect(self.addItem)
-        self.toolbar.addWidget(add_item)
-
-        self.toolbar.addSeparator()
-
-        search_label = QLabel("Search: ")
-        self.toolbar.addWidget(search_label)
-
-        search = QLineEdit()
-        search.textEdited.connect(self.search)
-        self.toolbar.addWidget(search)
-
-        self.addToolBar(self.toolbar)
 
 
     def setMaxByPercentage(self, w, h):
@@ -168,7 +174,7 @@ class MainWindow(QMainWindow):
             self.master_password_line.clear()
             return
 
-        self.buildManager()
+        self.loggedIn()
 
 
     def addLoginMessage(self, string, error=False):
@@ -183,6 +189,9 @@ class MainWindow(QMainWindow):
         if error: message.setStyleSheet("color: red;")
         else: message.setStyleSheet("")
 
+
+    def search(self, s):
+        self.buildManager(s)
 
     def showDetails(self):
         pass
@@ -201,9 +210,6 @@ class MainWindow(QMainWindow):
         QMessageBox.information(self, "Clipboard", "Password copied to clipboard!")
 
     def addItem(self):
-        pass
-
-    def search(self):
         pass
 
 

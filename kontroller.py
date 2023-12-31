@@ -32,5 +32,5 @@ class Kontroller:
     def getPassword(self, name):
         return self.PA.getPassword(self.passordfil, self.master_password, name)
     
-    def getNamesAndUsernames(self):
-       return self.PA.getNamesAndUsernames(self.passordfil)
+    def getNamesAndUsernames(self, s=""):
+       return self.PA.getNamesAndUsernames(self.passordfil, s)

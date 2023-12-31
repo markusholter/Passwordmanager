@@ -55,7 +55,7 @@ class Passordadministrasjon:
         return password
     
 
-    def getNamesAndUsernames(self, passordfil) -> dict:
+    def getNamesAndUsernames(self, passordfil, search) -> dict:
         if not os.path.exists(passordfil):
             return None
         names = {}
@@ -64,6 +64,7 @@ class Passordadministrasjon:
             f.readline()
             for line in f:
                 line = line.strip().split(",")
+                if search not in line[0]: continue
                 names[line[0]] = line[1]
 
         return names
