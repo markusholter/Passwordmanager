@@ -5,10 +5,10 @@ from functools import partial
 from PyQt6.QtWidgets import (QApplication, QMainWindow, QHBoxLayout, 
                              QLineEdit, QPushButton, QWidget,
                              QLabel, QVBoxLayout, QGridLayout,
-                             QScrollArea, QMessageBox)
+                             QScrollArea, QMessageBox, QToolBar)
 
-from PyQt6.QtGui import QAction, QMouseEvent
-from PyQt6.QtCore import Qt, QSize
+from PyQt6.QtGui import QMouseEvent, QFontMetrics
+from PyQt6.QtCore import Qt
 
 class MainWindow(QMainWindow):
     def __init__(self, kontroller):
@@ -19,6 +19,7 @@ class MainWindow(QMainWindow):
         self.master_password_line = QLineEdit()
         self.main_widget = QWidget()
         self.services = {}
+        self.toolbar = None
 
         self.setWindowTitle("Passwordmanager")
         self.setMaxByPercentage(0.3, 0.5)
@@ -53,6 +54,77 @@ class MainWindow(QMainWindow):
         self.main_widget.setLayout(self.my_layout)
 
         self.setCentralWidget(self.main_widget)
+
+
+    def buildManager(self):
+        scroll_area = QScrollArea()
+        self.my_layout = QGridLayout(scroll_area)
+        self.main_widget = QWidget()
+        self.services = self.KONTROLLER.getNamesAndUsernames()
+        self.toolbar = QToolBar("Toolbar")
+
+        self.my_layout.setHorizontalSpacing(5)
+        self.main_widget.setLayout(self.my_layout)
+
+        i = 0
+        for service in self.services:
+            service_space = QVBoxLayout()
+
+            q_service = QLabel(service)
+            q_service.setStyleSheet("font-size: 13pt;")
+            q_service.setMaximumWidth(200)
+            font_metrics = QFontMetrics(q_service.font())
+            elided_service = font_metrics.elidedText(q_service.text(), Qt.TextElideMode.ElideMiddle, q_service.maximumWidth() - 60)
+            q_service.setText(elided_service)
+            q_service.setAlignment(Qt.AlignmentFlag.AlignBottom)
+            service_space.addWidget(q_service)
+
+            username = QLineEdit(self.services[service])
+            username.setStyleSheet("font-style: italic; background-color: transparent; border: 0px;")
+            username.setMaximumWidth(200)
+            font_metrics = QFontMetrics(username.font())
+            elided_service = font_metrics.elidedText(username.text(), Qt.TextElideMode.ElideMiddle, username.maximumWidth() - 60)
+            username.setText(elided_service)
+            username.setAlignment(Qt.AlignmentFlag.AlignTop)
+            username.setReadOnly(True)
+            service_space.addWidget(username)
+
+            self.my_layout.addLayout(service_space, i, 0)
+
+
+            show_details = QPushButton("Details")
+            show_details.clicked.connect(self.showDetails)
+            self.my_layout.addWidget(show_details, i, 1)
+
+            copy_password = QPushButton("Copy password")
+            copy_password.clicked.connect(partial(self.copyPassword, q_service.text()))
+            self.my_layout.addWidget(copy_password, i, 2)
+
+            i += 1
+
+        scroll_area.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+        scroll_area.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAsNeeded)
+        scroll_area.setWidget(self.main_widget)
+        self.resize(self.main_widget.width() + 20, self.main_widget.height())
+        self.setCentralWidget(scroll_area)
+
+
+        self.toolbar.setMovable(False)
+        
+        add_item = QPushButton("Add item")
+        add_item.clicked.connect(self.addItem)
+        self.toolbar.addWidget(add_item)
+
+        self.toolbar.addSeparator()
+
+        search_label = QLabel("Search: ")
+        self.toolbar.addWidget(search_label)
+
+        search = QLineEdit()
+        search.textEdited.connect(self.search)
+        self.toolbar.addWidget(search)
+
+        self.addToolBar(self.toolbar)
 
 
     def setMaxByPercentage(self, w, h):
@@ -112,50 +184,6 @@ class MainWindow(QMainWindow):
         else: message.setStyleSheet("")
 
 
-    def buildManager(self):
-        scroll_area = QScrollArea()
-        self.my_layout = QGridLayout(scroll_area)
-        self.main_widget = QWidget()
-        self.services = self.KONTROLLER.getNamesAndUsernames()
-
-        self.my_layout.setHorizontalSpacing(5)
-        self.main_widget.setLayout(self.my_layout)
-
-        i = 0
-        for service in self.services:
-            service_space = QVBoxLayout()
-
-            q_service = QLabel(service)
-            q_service.setStyleSheet("font-size: 15pt")
-            q_service.setAlignment(Qt.AlignmentFlag.AlignBottom)
-            service_space.addWidget(q_service)
-
-            username = QLineEdit(self.services[service])
-            username.setStyleSheet("font-style: italic; background-color: transparent; border: 0px;")
-            username.setAlignment(Qt.AlignmentFlag.AlignTop)
-            username.setReadOnly(True)
-            service_space.addWidget(username)
-
-            self.my_layout.addLayout(service_space, i, 0)
-
-
-            show_details = QPushButton("Details")
-            show_details.clicked.connect(self.showDetails)
-            self.my_layout.addWidget(show_details, i, 1)
-
-            copy_password = QPushButton("Copy password")
-            copy_password.clicked.connect(partial(self.copyPassword, q_service.text()))
-            self.my_layout.addWidget(copy_password, i, 2)
-
-            i += 1
-
-        scroll_area.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
-        scroll_area.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAsNeeded)
-        scroll_area.setWidget(self.main_widget)
-        self.resize(self.main_widget.width() + 10, self.main_widget.height())
-        self.setCentralWidget(scroll_area)
-
-
     def showDetails(self):
         pass
 
@@ -171,6 +199,12 @@ class MainWindow(QMainWindow):
         clipboard.setText(password)
 
         QMessageBox.information(self, "Clipboard", "Password copied to clipboard!")
+
+    def addItem(self):
+        pass
+
+    def search(self):
+        pass
 
 
 def start(kontroller):
