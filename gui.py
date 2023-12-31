@@ -57,14 +57,14 @@ class MainWindow(QMainWindow):
 
 
     def buildManager(self):
-        scroll_area = QScrollArea()
-        self.my_layout = QGridLayout(scroll_area)
-        self.main_widget = QWidget()
+        self.main_widget = QScrollArea()
+        self.my_layout = QGridLayout(self.main_widget)
+        under_widget = QWidget()
         self.services = self.KONTROLLER.getNamesAndUsernames()
         self.toolbar = QToolBar("Toolbar")
 
         self.my_layout.setHorizontalSpacing(5)
-        self.main_widget.setLayout(self.my_layout)
+        under_widget.setLayout(self.my_layout)
 
         i = 0
         for service in self.services:
@@ -102,11 +102,11 @@ class MainWindow(QMainWindow):
 
             i += 1
 
-        scroll_area.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
-        scroll_area.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAsNeeded)
-        scroll_area.setWidget(self.main_widget)
-        self.resize(self.main_widget.width() + 20, self.main_widget.height())
-        self.setCentralWidget(scroll_area)
+        self.main_widget.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+        self.main_widget.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAsNeeded)
+        self.main_widget.setWidget(under_widget)
+        self.resize(under_widget.width() + 20, under_widget.height() + self.toolbar.heightMM())
+        self.setCentralWidget(self.main_widget)
 
 
         self.toolbar.setMovable(False)
