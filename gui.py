@@ -1,10 +1,11 @@
 import sys
 from kontroller import Kontroller
+from functools import partial
 
 from PyQt6.QtWidgets import (QApplication, QMainWindow, QHBoxLayout, 
                              QLineEdit, QPushButton, QWidget,
                              QLabel, QVBoxLayout, QGridLayout,
-                             QScrollArea)
+                             QScrollArea, QMessageBox)
 
 from PyQt6.QtGui import QAction, QMouseEvent
 from PyQt6.QtCore import Qt, QSize
@@ -143,6 +144,7 @@ class MainWindow(QMainWindow):
             self.my_layout.addWidget(show_details, i, 1)
 
             copy_password = QPushButton("Copy password")
+            copy_password.clicked.connect(partial(self.copyPassword, q_service.text()))
             self.my_layout.addWidget(copy_password, i, 2)
 
             i += 1
@@ -161,6 +163,15 @@ class MainWindow(QMainWindow):
         if self.focusWidget():
             self.focusWidget().clearFocus()
         return super().mousePressEvent(a0)
+    
+
+    def copyPassword(self, service):
+        clipboard = QApplication.clipboard()
+        password = self.KONTROLLER.getPassword(service)
+        clipboard.setText(password)
+
+        QMessageBox.information(self, "Clipboard", "Password copied to clipboard!")
+
 
 def start(kontroller):
     app = QApplication([])
