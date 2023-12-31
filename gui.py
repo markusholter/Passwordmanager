@@ -3,10 +3,11 @@ from kontroller import Kontroller
 
 from PyQt6.QtWidgets import (QApplication, QMainWindow, QHBoxLayout, 
                              QLineEdit, QPushButton, QWidget,
-                             QLabel, QVBoxLayout, QGridLayout)
+                             QLabel, QVBoxLayout, QGridLayout,
+                             QScrollArea)
 
-from PyQt6.QtGui import QAction
-from PyQt6.QtCore import Qt
+from PyQt6.QtGui import QAction, QMouseEvent
+from PyQt6.QtCore import Qt, QSize
 
 class MainWindow(QMainWindow):
     def __init__(self, kontroller):
@@ -15,9 +16,11 @@ class MainWindow(QMainWindow):
         self.my_layout = QGridLayout()
         self.user_line = QLineEdit()
         self.master_password_line = QLineEdit()
-        self.mainWidget = QWidget()
+        self.main_widget = QWidget()
+        self.services = {}
 
         self.setWindowTitle("Passwordmanager")
+        self.setMaxByPercentage(0.3, 0.5)
 
         user_instruction = QLabel("Username:")
         self.my_layout.addWidget(user_instruction, 1, 1)
@@ -46,10 +49,17 @@ class MainWindow(QMainWindow):
 
         self.my_layout.addLayout(buttons, 3, 2)
 
-        self.mainWidget.setLayout(self.my_layout)
+        self.main_widget.setLayout(self.my_layout)
 
-        self.setCentralWidget(self.mainWidget)
+        self.setCentralWidget(self.main_widget)
 
+
+    def setMaxByPercentage(self, w, h):
+        screen = QApplication.primaryScreen()
+        screenGeometry = screen.availableGeometry()
+        minw = int(screenGeometry.width() * w)
+        minh = int(screenGeometry.height() * h)
+        self.setMaximumSize(minw, minh)
 
     def setMinByPercentage(self, w, h):
         screen = QApplication.primaryScreen()
@@ -102,14 +112,55 @@ class MainWindow(QMainWindow):
 
 
     def buildManager(self):
-        self.my_layout = QGridLayout()
-        self.mainWidget = QWidget()
+        scroll_area = QScrollArea()
+        self.my_layout = QGridLayout(scroll_area)
+        self.main_widget = QWidget()
+        self.services = self.KONTROLLER.getNamesAndUsernames()
 
-        
+        self.my_layout.setHorizontalSpacing(5)
+        self.main_widget.setLayout(self.my_layout)
 
-        self.mainWidget.setLayout(self.my_layout)
-        self.setCentralWidget(self.mainWidget)
+        i = 0
+        for service in self.services:
+            service_space = QVBoxLayout()
 
+            q_service = QLabel(service)
+            q_service.setStyleSheet("font-size: 15pt")
+            q_service.setAlignment(Qt.AlignmentFlag.AlignBottom)
+            service_space.addWidget(q_service)
+
+            username = QLineEdit(self.services[service])
+            username.setStyleSheet("font-style: italic; background-color: transparent; border: 0px;")
+            username.setAlignment(Qt.AlignmentFlag.AlignTop)
+            username.setReadOnly(True)
+            service_space.addWidget(username)
+
+            self.my_layout.addLayout(service_space, i, 0)
+
+
+            show_details = QPushButton("Details")
+            show_details.clicked.connect(self.showDetails)
+            self.my_layout.addWidget(show_details, i, 1)
+
+            copy_password = QPushButton("Copy password")
+            self.my_layout.addWidget(copy_password, i, 2)
+
+            i += 1
+
+        scroll_area.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+        scroll_area.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAsNeeded)
+        scroll_area.setWidget(self.main_widget)
+        self.resize(self.main_widget.width() + 10, self.main_widget.height())
+        self.setCentralWidget(scroll_area)
+
+
+    def showDetails(self):
+        pass
+
+    def mousePressEvent(self, a0: QMouseEvent | None) -> None: # For at den blå borderen rundt knapper skal forsvinne når man klikker et annet sted
+        if self.focusWidget():
+            self.focusWidget().clearFocus()
+        return super().mousePressEvent(a0)
 
 def start(kontroller):
     app = QApplication([])

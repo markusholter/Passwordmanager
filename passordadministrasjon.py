@@ -53,3 +53,17 @@ class Passordadministrasjon:
 
 
         return password
+    
+
+    def getNamesAndUsernames(self, passordfil) -> dict:
+        if not os.path.exists(passordfil):
+            return None
+        names = {}
+
+        with open(passordfil, "r") as f:
+            f.readline()
+            for line in f:
+                line = line.strip().split(",")
+                names[line[0]] = line[1]
+
+        return names

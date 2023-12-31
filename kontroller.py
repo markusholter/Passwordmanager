@@ -20,7 +20,6 @@ class Kontroller:
             self.user = user
             self.passordfil = user + ".txt"
             self.master_password = master_password
-            print(user, master_password)
         
         return worked
     
@@ -32,3 +31,6 @@ class Kontroller:
     
     def getPassword(self, name):
         return self.PA.getPassword(self.passordfil, self.master_password, name)
+    
+    def getNamesAndUsernames(self):
+       return self.PA.getNamesAndUsernames(self.passordfil)
