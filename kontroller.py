@@ -27,7 +27,7 @@ class Kontroller:
         self.BA.createUser(self.BRUKERFIL, user, master_password)
 
     def addPassword(self, name, username, newPassword):
-        return self.PA.addPassword(self.passordfil, self.master_password, name, username, newPassword)
+        return self.PA.addPassword(self.passordfil, self.master_password, name, username, newPassword.encode())
     
     def getPassword(self, name):
         return self.PA.getPassword(self.passordfil, self.master_password, name)

@@ -20,6 +20,7 @@ class MainWindow(QMainWindow):
         self.main_widget = QWidget()
         self.under_widget = QWidget()
         self.services = {}
+        self.item_window = None
         self.toolbar = None
 
         self.setWindowTitle("Passwordmanager")
@@ -56,6 +57,7 @@ class MainWindow(QMainWindow):
 
         self.setCentralWidget(self.main_widget)
 
+
     def loggedIn(self):
         self.services = self.KONTROLLER.getNamesAndUsernames()
         self.toolbar = QToolBar("Toolbar")
@@ -79,6 +81,7 @@ class MainWindow(QMainWindow):
 
         self.addToolBar(self.toolbar)
 
+
     def buildManager(self, search=""):
         self.main_widget = QScrollArea()
         self.my_layout = QGridLayout(self.main_widget)
@@ -94,6 +97,7 @@ class MainWindow(QMainWindow):
         self.main_widget.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAsNeeded)
         self.main_widget.setWidget(self.under_widget)
         self.setCentralWidget(self.main_widget)
+
 
     def listServices(self, services):
         i = 0
@@ -193,8 +197,10 @@ class MainWindow(QMainWindow):
     def search(self, s):
         self.buildManager(s)
 
+
     def showDetails(self):
         pass
+
 
     def mousePressEvent(self, a0: QMouseEvent | None) -> None: # For at den blå borderen rundt knapper skal forsvinne når man klikker et annet sted
         if self.focusWidget():
@@ -210,7 +216,84 @@ class MainWindow(QMainWindow):
         QMessageBox.information(self, "Clipboard", "Password copied to clipboard!")
 
     def addItem(self):
-        pass
+        self.item_window = AddItemWindow(self)
+        self.item_window.show()
+
+    def addPassword(self, name, username, new_password):
+        self.KONTROLLER.addPassword(name, username, new_password)
+        self.buildManager()
+        self.item_window.close()
+        self.item_window = QWidget()
+
+
+
+class AddItemWindow(QWidget):
+    def __init__(self, main_window: MainWindow):
+        super().__init__()
+        self.main_window = main_window
+        self.my_layout = QGridLayout()
+        self.name = QLineEdit()
+        self.username = QLineEdit()
+        self.password = QLineEdit()
+        self.name.returnPressed.connect(self.done)
+        self.username.returnPressed.connect(self.done)
+        self.password.returnPressed.connect(self.done)
+
+        name_label = QLabel("Service: ")
+        self.my_layout.addWidget(name_label, 0, 0)
+        self.my_layout.addWidget(self.name, 0, 1)
+
+
+        username_label = QLabel("Username: ")
+        self.my_layout.addWidget(username_label, 1, 0)
+        self.my_layout.addWidget(self.username, 1, 1)
+
+
+        password_label = QLabel("Password: ")
+        self.my_layout.addWidget(password_label, 2, 0)
+        self.password.setEchoMode(QLineEdit.EchoMode.Password)
+        self.my_layout.addWidget(self.password, 2, 1)
+
+
+        button_layout = QHBoxLayout()
+
+        self.show_password = QPushButton("Show password")
+        self.show_password.clicked.connect(self.showPassword)
+        button_layout.addWidget(self.show_password)
+
+        done = QPushButton("Done")
+        done.clicked.connect(self.done)
+        button_layout.addWidget(done)
+
+        self.my_layout.addLayout(button_layout, 3, 1)
+
+        self.setLayout(self.my_layout)
+
+
+    def showPassword(self):
+        self.show_password.setFixedSize(self.show_password.size())
+
+        if self.password.echoMode() == QLineEdit.EchoMode.Password:
+            self.password.setEchoMode(QLineEdit.EchoMode.Normal)
+            self.show_password.setText("Hide password")
+        else:
+            self.password.setEchoMode(QLineEdit.EchoMode.Password)
+            self.show_password.setText("Show password")
+
+
+    def done(self):
+        name = self.name.text()
+        username = self.username.text()
+        password = self.password.text()
+        self.main_window.addPassword(name, username, password)
+        
+
+
+
+    def mousePressEvent(self, a0: QMouseEvent | None) -> None: # For at den blå borderen rundt knapper skal forsvinne når man klikker et annet sted
+        if self.focusWidget():
+            self.focusWidget().clearFocus()
+        return super().mousePressEvent(a0)
 
 
 def start(kontroller):
