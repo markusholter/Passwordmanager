@@ -251,11 +251,6 @@ class ItemWindow(QWidget):
         self.password.setEchoMode(QLineEdit.EchoMode.Password)
         self.my_layout.addWidget(self.password, 2, 1)
 
-
-        self.show_password = QPushButton("Show password")
-        self.show_password.clicked.connect(self.showPassword)
-        self.button_layout.addWidget(self.show_password)
-
         self.my_layout.addLayout(self.button_layout, 3, 1)
 
         self.setLayout(self.my_layout)
@@ -285,6 +280,10 @@ class AddItemWindow(ItemWindow):
         self.username.returnPressed.connect(self.done)
         self.password.returnPressed.connect(self.done)
 
+        self.show_password = QPushButton("Show password")
+        self.show_password.clicked.connect(self.showPassword)
+        self.button_layout.addWidget(self.show_password)
+
         done = QPushButton("Done")
         done.clicked.connect(self.done)
         self.button_layout.addWidget(done)
@@ -299,10 +298,27 @@ class AddItemWindow(ItemWindow):
 class DetailsItemWindow(ItemWindow):
     def __init__(self, main_window, service, username, password):
         super().__init__(main_window)
+        mini_button_layout = QVBoxLayout()
+
+        self.show_password = QPushButton("Show password")
+        self.show_password.clicked.connect(self.showPassword)
+        mini_button_layout.addWidget(self.show_password)
+
+        edit_button = QPushButton("Edit")
+        mini_button_layout.addWidget(edit_button)
+        edit_button.clicked.connect(self.edit)
+        self.button_layout.addLayout(mini_button_layout)
+
+        mini_button_layout = QVBoxLayout()
 
         copy_password = QPushButton("Copy password")
-        self.button_layout.addWidget(copy_password)
+        mini_button_layout.addWidget(copy_password)
         copy_password.clicked.connect(partial(self.copyPassword, service))
+
+        delete_button = QPushButton("Delete")
+        mini_button_layout.addWidget(delete_button)
+        delete_button.clicked.connect(self.delete)
+        self.button_layout.addLayout(mini_button_layout)
 
         self.name.setText(service)
         self.name.setReadOnly(True)
@@ -316,6 +332,14 @@ class DetailsItemWindow(ItemWindow):
 
     def copyPassword(self, service):
         self.main_window.copyPassword(service)
+
+    def edit(self):
+        pass
+
+    def delete(self):
+        self.main_window.KONTROLLER.deleteItem(self.name.text())
+        self.main_window.buildManager()
+        self.close()
         
 
 def start(kontroller):
