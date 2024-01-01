@@ -106,4 +106,26 @@ class Cli():
         print(f"{service} is deleted!")
 
     def editItem(self):
-        pass
+        print("What do you want to change?")
+        print("1. Service name")
+        print("2. Username")
+        print("3. Password")
+        edit = input("Type the number here: ")
+
+        service = input("Type the name of service you want to change: ")
+        change = input("Type the change: ")
+
+        if edit == "1":
+            status = self.KONTROLLER.editServicename(service, change)
+        elif edit == "2":
+            status = self.KONTROLLER.editUsername(service, change)
+        elif edit == "3":
+            status = self.KONTROLLER.editPassword(service, change)
+        else:
+            print("Not a thing!")
+            return
+        
+        if status:
+            print("Change completed!")
+        else:
+            print("Couldn't change!")

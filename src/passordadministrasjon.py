@@ -6,16 +6,16 @@ from base64 import b64decode, b64encode
 
 class Passordadministrasjon:
 
-    def addPassword(self, passordfil, masterPasswd, service, username, newPassword):
+    def addPassword(self, passordfil, master_password, service, username, new_password):
 
         if not os.path.exists(passordfil):
             with open(passordfil, "w") as f:
                 f.write("service,username,password,tag,nonce,salt\n")
 
         salt = get_random_bytes(16) # Litt salt må til
-        key = scrypt(masterPasswd, salt, 16, 2**14, 8, 1) # Nøkkel som skal brukes til krypteringen av passordet
+        key = scrypt(master_password, salt, 16, 2**14, 8, 1) # Nøkkel som skal brukes til krypteringen av passordet
         cipher = AES.new(key, AES.MODE_EAX) # Cipher til å kryptere
-        cipherpass, tag = cipher.encrypt_and_digest(newPassword) # Krypteringsdel
+        cipherpass, tag = cipher.encrypt_and_digest(new_password) # Krypteringsdel
 
         # Konverterer ting til strenger for å kunne skrive til fil:
         cipherpass = b64encode(cipherpass).decode()
@@ -29,7 +29,7 @@ class Passordadministrasjon:
         return True
 
 
-    def getPassword(self, passordfil, masterPasswd, service):
+    def getPassword(self, passordfil, master_password, service):
         password = ""
         with open(passordfil, "r") as f:
             for line in f:
@@ -47,7 +47,7 @@ class Passordadministrasjon:
         nonce = b64decode(nonce.encode())
         salt = b64decode(salt.encode())
         
-        key = scrypt(masterPasswd, salt, 16, 2**14, 8, 1)
+        key = scrypt(master_password, salt, 16, 2**14, 8, 1)
         cipher = AES.new(key, AES.MODE_EAX, nonce)
         password = cipher.decrypt_and_verify(password, tag).decode()
 
@@ -84,3 +84,55 @@ class Passordadministrasjon:
 
         with open(passordfil, "w") as f:
             f.writelines(lines)
+
+    def editItem(self, passordfil, service, change, index) -> bool:
+        if not os.path.exists(passordfil):
+            return False
+        
+        with open(passordfil, "r") as f:
+            lines = f.readlines()
+
+        for i in range(1, len(lines)):
+            line = lines[i].split(",")
+            if line[0] != service:
+                continue
+            line[index] = change
+            lines[i] = ",".join(line)
+            with open(passordfil, "w") as f:
+                f.writelines(lines)
+            return True
+        
+        return False
+    
+    def editPassword(self, passordfil, service, master_password, new_password):
+        if not os.path.exists(passordfil):
+            return False
+        
+        salt = get_random_bytes(16) # Litt salt må til
+        key = scrypt(master_password, salt, 16, 2**14, 8, 1) # Nøkkel som skal brukes til krypteringen av passordet
+        cipher = AES.new(key, AES.MODE_EAX) # Cipher til å kryptere
+        cipherpass, tag = cipher.encrypt_and_digest(new_password) # Krypteringsdel
+
+        # Konverterer ting til strenger for å kunne skrive til fil:
+        cipherpass = b64encode(cipherpass).decode()
+        tag = b64encode(tag).decode()
+        nonce = b64encode(cipher.nonce).decode()
+        salt = b64encode(salt).decode()
+
+        with open(passordfil, "r") as f:
+            lines = f.readlines()
+
+        for i in range(len(lines)):
+            line = lines[i].split(",")
+            if line[0] != service:
+                continue
+            for _ in range(len(line[2:])):
+                line.pop()
+
+            line.extend([cipherpass, tag, nonce, salt + "\n"])
+            lines[i] = ",".join(line)
+            with open(passordfil, "w") as f:
+                f.writelines(lines)
+            return True
+        
+        return False

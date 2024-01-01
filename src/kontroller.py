@@ -37,3 +37,12 @@ class Kontroller:
     
     def deleteItem(self, service):
         self.PA.deleteItem(self.passordfil, service)
+
+    def editServicename(self, service, change):
+        return self.PA.editItem(self.passordfil, service, change, 0)
+    
+    def editUsername(self, service, change):
+        return self.PA.editItem(self.passordfil, service, change, 1)
+    
+    def editPassword(self, service, new_password):
+        return self.PA.editPassword(self.passordfil, service, self.master_password, new_password.encode())
