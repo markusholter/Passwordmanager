@@ -236,6 +236,7 @@ class ItemWindow(QWidget):
         self.username = QLineEdit()
         self.password = QLineEdit()
         self.button_layout = QHBoxLayout()
+        self.show_password = QPushButton("Show password")
 
         name_label = QLabel("Service: ")
         self.my_layout.addWidget(name_label, 0, 0)
@@ -280,7 +281,6 @@ class AddItemWindow(ItemWindow):
         self.username.returnPressed.connect(self.done)
         self.password.returnPressed.connect(self.done)
 
-        self.show_password = QPushButton("Show password")
         self.show_password.clicked.connect(self.showPassword)
         self.button_layout.addWidget(self.show_password)
 
@@ -298,27 +298,26 @@ class AddItemWindow(ItemWindow):
 class DetailsItemWindow(ItemWindow):
     def __init__(self, main_window, service, username, password):
         super().__init__(main_window)
-        mini_button_layout = QVBoxLayout()
+        self.v_mini_button_layout = QVBoxLayout()
+        self.h_mini_button_layout = QVBoxLayout()
+        self.copy_password = QPushButton("Copy password")
+        self.delete_button = QPushButton("Delete")
+        self.edit_button = QPushButton("Edit")
 
-        self.show_password = QPushButton("Show password")
         self.show_password.clicked.connect(self.showPassword)
-        mini_button_layout.addWidget(self.show_password)
+        self.v_mini_button_layout.addWidget(self.show_password)
 
-        edit_button = QPushButton("Edit")
-        mini_button_layout.addWidget(edit_button)
-        edit_button.clicked.connect(self.edit)
-        self.button_layout.addLayout(mini_button_layout)
+        self.v_mini_button_layout.addWidget(self.edit_button)
+        self.edit_button.clicked.connect(self.edit)
+        self.button_layout.addLayout(self.v_mini_button_layout)
 
-        mini_button_layout = QVBoxLayout()
 
-        copy_password = QPushButton("Copy password")
-        mini_button_layout.addWidget(copy_password)
-        copy_password.clicked.connect(partial(self.copyPassword, service))
+        self.h_mini_button_layout.addWidget(self.copy_password)
+        self.copy_password.clicked.connect(partial(self.copyPassword, service))
 
-        delete_button = QPushButton("Delete")
-        mini_button_layout.addWidget(delete_button)
-        delete_button.clicked.connect(self.delete)
-        self.button_layout.addLayout(mini_button_layout)
+        self.h_mini_button_layout.addWidget(self.delete_button)
+        self.delete_button.clicked.connect(self.delete)
+        self.button_layout.addLayout(self.h_mini_button_layout)
 
         self.name.setText(service)
         self.name.setReadOnly(True)
@@ -334,7 +333,34 @@ class DetailsItemWindow(ItemWindow):
         self.main_window.copyPassword(service)
 
     def edit(self):
-        pass
+        self.v_mini_button_layout.removeWidget(self.edit_button)
+        self.edit_button.deleteLater()
+        self.h_mini_button_layout.removeWidget(self.delete_button)
+        self.delete_button.deleteLater()
+        
+        self.name.setReadOnly(False)
+        self.username.setReadOnly(False)
+        self.password.setReadOnly(False)
+
+        self.copy_password.setText("Done")
+        self.copy_password.clicked.disconnect()
+        self.copy_password.clicked.connect(partial(self.done, self.name.text(), self.username.text(), self.password.text()))
+
+    def done(self, original_name, original_username, original_password):
+        new_name = self.name.text()
+        new_username = self.username.text()
+        new_password = self.password.text()
+
+        if new_name != original_name:
+            print("service", self.main_window.KONTROLLER.editServicename(original_name, new_name))
+        if new_username != original_username:
+            print("username", self.main_window.KONTROLLER.editUsername(new_name, new_username))
+        if new_password != original_password:
+            print("password", self.main_window.KONTROLLER.editPassword(new_name, new_password))
+
+        self.main_window.buildManager()
+        self.close()
+        
 
     def delete(self):
         self.main_window.KONTROLLER.deleteItem(self.name.text())
