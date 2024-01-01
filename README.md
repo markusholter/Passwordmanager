@@ -1,3 +1,8 @@
 # Passwordmanager
 
-Et forsøk på å lage en passordmanager. Den skal forhåpentligvis være sikker til slutt, i tillegg til mulig å bruke i nettleser. Hvis jeg er superoptimistisk blir det app også.
+A passwordmanager that can be interacted with either via command line or GUI.
+
+# Dependencies to run the src-files
+- Python
+- PyCryptodome
+- PyQt6
