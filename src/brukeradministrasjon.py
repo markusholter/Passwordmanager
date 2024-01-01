@@ -22,7 +22,7 @@ class Brukeradministrasjon:
 
     def checkIfTaken(self, brukerfil, user):
         with open(brukerfil, "r") as f:
-            usernames = [name.strip().split(",")[0] for name in f.readlines()[1:]]
+            usernames = [line.strip().split(",")[0] for line in f.readlines()[1:]]
         return user in usernames
 
     def createUser(self, brukerfil, user, passwd):

@@ -18,6 +18,7 @@ class Cli():
             print("2. Get password")
             print("3. List all saved services")
             print("4. Delete a service")
+            print("5. Edit a service")
             inp = input("Type the number here: ")
             print()
             if inp == "0": break
@@ -29,19 +30,21 @@ class Cli():
                 self.listAllServices()
             elif inp == "4":
                 self.deleteItem()
+            elif inp == "5":
+                self.editItem()
             else:
                 print("Not a thing!")
 
     def addPassword(self):
-        name = input("Write the name of the service: ")
+        service = input("Write the name of the service: ")
         username = input("Write your username: ")
         newPassword = input("Write the new password here: ")
-        if self.KONTROLLER.addPassword(name, username, newPassword):
-            print("Password for " + name + " is now added!")
+        if self.KONTROLLER.addPassword(service, username, newPassword):
+            print("Password for " + service + " is now added!")
 
     def getPassword(self):
-        name = input("Write the name of the service: ")
-        password = self.KONTROLLER.getPassword(name)
+        service = input("Write the name of the service: ")
+        password = self.KONTROLLER.getPassword(service)
         if password:
             print("Your password is:")
             print(password)
@@ -101,3 +104,6 @@ class Cli():
         service = input("Name of the service you want to delete: ")
         self.KONTROLLER.deleteItem(service)
         print(f"{service} is deleted!")
+
+    def editItem(self):
+        pass
