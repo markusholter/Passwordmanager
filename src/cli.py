@@ -17,6 +17,7 @@ class Cli():
             print("1. Add new password")
             print("2. Get password")
             print("3. List all saved services")
+            print("4. Delete a service")
             inp = input("Type the number here: ")
             print()
             if inp == "0": break
@@ -26,13 +27,15 @@ class Cli():
                 self.getPassword()
             elif inp == "3":
                 self.listAllServices()
+            elif inp == "4":
+                self.deleteItem()
             else:
                 print("Not a thing!")
 
     def addPassword(self):
         name = input("Write the name of the service: ")
         username = input("Write your username: ")
-        newPassword = input("Write the new password here: ").encode()
+        newPassword = input("Write the new password here: ")
         if self.KONTROLLER.addPassword(name, username, newPassword):
             print("Password for " + name + " is now added!")
 
@@ -58,8 +61,8 @@ class Cli():
             self.loggInn()
             print()
             return
-        else:
-            self.getUser()
+        
+        self.getUser()
 
         self.drift()
 
@@ -93,3 +96,8 @@ class Cli():
         print("This is the format printed: service: username")
         for service in services:
             print(f"{service}: {services[service]}")
+
+    def deleteItem(self):
+        service = input("Name of the service you want to delete: ")
+        self.KONTROLLER.deleteItem(service)
+        print(f"{service} is deleted!")

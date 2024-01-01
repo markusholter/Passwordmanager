@@ -34,3 +34,6 @@ class Kontroller:
     
     def getNamesAndUsernames(self, s=""):
        return self.PA.getNamesAndUsernames(self.passordfil, s)
+    
+    def deleteItem(self, service):
+        self.PA.deleteItem(self.passordfil, service)

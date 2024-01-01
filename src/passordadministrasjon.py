@@ -68,3 +68,19 @@ class Passordadministrasjon:
                 names[line[0]] = line[1]
 
         return names
+    
+    def deleteItem(self, passordfil, service):
+        if not os.path.exists(passordfil):
+            return
+        
+        with open(passordfil, "r") as f:
+            lines = f.readlines()
+
+        for i in range(len(lines)):
+            if lines[i].strip().split(",")[0] != service: 
+                continue
+            lines.pop(i)
+            break
+
+        with open(passordfil, "w") as f:
+            f.writelines(lines)
