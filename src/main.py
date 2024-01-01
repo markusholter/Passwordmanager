@@ -13,4 +13,4 @@ def startCli():
 
 if __name__ == "__main__":
     brukere = "Users.txt"
-    startGui()
+    startCli()

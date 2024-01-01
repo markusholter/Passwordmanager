@@ -16,6 +16,7 @@ class Cli():
             print("0. Exit")
             print("1. Add new password")
             print("2. Get password")
+            print("3. List all saved services")
             inp = input("Type the number here: ")
             print()
             if inp == "0": break
@@ -23,6 +24,8 @@ class Cli():
                 self.addPassword()
             elif inp == "2":
                 self.getPassword()
+            elif inp == "3":
+                self.listAllServices()
             else:
                 print("Not a thing!")
 
@@ -84,3 +87,9 @@ class Cli():
         self.masterPasswd = password
         print("You are logged in!")
         self.passordfil = user + ".txt"
+
+    def listAllServices(self):
+        services = self.KONTROLLER.getNamesAndUsernames()
+        print("This is the format printed: service: username")
+        for service in services:
+            print(f"{service}: {services[service]}")
