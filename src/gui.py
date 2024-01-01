@@ -1,4 +1,3 @@
-import sys
 from kontroller import Kontroller
 from functools import partial
 
