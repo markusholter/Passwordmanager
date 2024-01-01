@@ -127,7 +127,7 @@ class MainWindow(QMainWindow):
 
 
             show_details = QPushButton("Details")
-            show_details.clicked.connect(self.showDetails)
+            show_details.clicked.connect(partial(self.showDetails, q_service.text()))
             self.my_layout.addWidget(show_details, i, 1)
 
             copy_password = QPushButton("Copy password")
@@ -198,10 +198,6 @@ class MainWindow(QMainWindow):
         self.buildManager(s)
 
 
-    def showDetails(self):
-        pass
-
-
     def mousePressEvent(self, a0: QMouseEvent | None) -> None: # For at den blå borderen rundt knapper skal forsvinne når man klikker et annet sted
         if self.focusWidget():
             self.focusWidget().clearFocus()
@@ -226,8 +222,13 @@ class MainWindow(QMainWindow):
         self.item_window = QWidget()
 
 
+    def showDetails(self, service):
+        self.item_window = DetailsItemWindow(self, service, self.services[service], self.KONTROLLER.getPassword(service))
+        self.item_window.show()
 
-class AddItemWindow(QWidget):
+
+
+class ItemWindow(QWidget):
     def __init__(self, main_window: MainWindow):
         super().__init__()
         self.main_window = main_window
@@ -235,9 +236,7 @@ class AddItemWindow(QWidget):
         self.name = QLineEdit()
         self.username = QLineEdit()
         self.password = QLineEdit()
-        self.name.returnPressed.connect(self.done)
-        self.username.returnPressed.connect(self.done)
-        self.password.returnPressed.connect(self.done)
+        self.button_layout = QHBoxLayout()
 
         name_label = QLabel("Service: ")
         self.my_layout.addWidget(name_label, 0, 0)
@@ -248,24 +247,17 @@ class AddItemWindow(QWidget):
         self.my_layout.addWidget(username_label, 1, 0)
         self.my_layout.addWidget(self.username, 1, 1)
 
-
         password_label = QLabel("Password: ")
         self.my_layout.addWidget(password_label, 2, 0)
         self.password.setEchoMode(QLineEdit.EchoMode.Password)
         self.my_layout.addWidget(self.password, 2, 1)
 
 
-        button_layout = QHBoxLayout()
-
         self.show_password = QPushButton("Show password")
         self.show_password.clicked.connect(self.showPassword)
-        button_layout.addWidget(self.show_password)
+        self.button_layout.addWidget(self.show_password)
 
-        done = QPushButton("Done")
-        done.clicked.connect(self.done)
-        button_layout.addWidget(done)
-
-        self.my_layout.addLayout(button_layout, 3, 1)
+        self.my_layout.addLayout(self.button_layout, 3, 1)
 
         self.setLayout(self.my_layout)
 
@@ -281,20 +273,51 @@ class AddItemWindow(QWidget):
             self.show_password.setText("Show password")
 
 
-    def done(self):
-        name = self.name.text()
-        username = self.username.text()
-        password = self.password.text()
-        self.main_window.addPassword(name, username, password)
-        
-
-
-
     def mousePressEvent(self, a0: QMouseEvent | None) -> None: # For at den blå borderen rundt knapper skal forsvinne når man klikker et annet sted
         if self.focusWidget():
             self.focusWidget().clearFocus()
         return super().mousePressEvent(a0)
 
+
+class AddItemWindow(ItemWindow):
+    def __init__(self, main_window: MainWindow):
+        super().__init__(main_window)
+        self.name.returnPressed.connect(self.done)
+        self.username.returnPressed.connect(self.done)
+        self.password.returnPressed.connect(self.done)
+
+        done = QPushButton("Done")
+        done.clicked.connect(self.done)
+        self.button_layout.addWidget(done)
+
+    def done(self):
+        name = self.name.text()
+        username = self.username.text()
+        password = self.password.text()
+        self.main_window.addPassword(name, username, password)
+
+
+class DetailsItemWindow(ItemWindow):
+    def __init__(self, main_window, service, username, password):
+        super().__init__(main_window)
+
+        copy_password = QPushButton("Copy password")
+        self.button_layout.addWidget(copy_password)
+        copy_password.clicked.connect(partial(self.copyPassword, service))
+
+        self.name.setText(service)
+        self.name.setReadOnly(True)
+
+        self.username.setText(username)
+        self.username.setReadOnly(True)
+
+        self.password.setText(password)
+        self.password.setReadOnly(True)
+
+
+    def copyPassword(self, service):
+        self.main_window.copyPassword(service)
+        
 
 def start(kontroller):
     app = QApplication([])
