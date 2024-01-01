@@ -12,6 +12,15 @@ class Passordadministrasjon:
             with open(passordfil, "w") as f:
                 f.write("service,username,password,tag,nonce,salt\n")
 
+        cipherpass, tag, nonce, salt = self.encrypt(master_password, new_password)
+
+        with open(passordfil, "a") as f:
+            f.write(service + "," + username + "," + cipherpass + "," + tag + "," + nonce + "," + salt + "\n")
+
+        return True
+
+
+    def encrypt(self, master_password, new_password):
         salt = get_random_bytes(16) # Litt salt må til
         key = scrypt(master_password, salt, 16, 2**14, 8, 1) # Nøkkel som skal brukes til krypteringen av passordet
         cipher = AES.new(key, AES.MODE_EAX) # Cipher til å kryptere
@@ -23,10 +32,7 @@ class Passordadministrasjon:
         nonce = b64encode(cipher.nonce).decode()
         salt = b64encode(salt).decode()
 
-        with open(passordfil, "a") as f:
-            f.write(service + "," + username + "," + cipherpass + "," + tag + "," + nonce + "," + salt + "\n")
-
-        return True
+        return cipherpass, tag, nonce, salt
 
 
     def getPassword(self, passordfil, master_password, service):
@@ -108,16 +114,7 @@ class Passordadministrasjon:
         if not os.path.exists(passordfil):
             return False
         
-        salt = get_random_bytes(16) # Litt salt må til
-        key = scrypt(master_password, salt, 16, 2**14, 8, 1) # Nøkkel som skal brukes til krypteringen av passordet
-        cipher = AES.new(key, AES.MODE_EAX) # Cipher til å kryptere
-        cipherpass, tag = cipher.encrypt_and_digest(new_password) # Krypteringsdel
-
-        # Konverterer ting til strenger for å kunne skrive til fil:
-        cipherpass = b64encode(cipherpass).decode()
-        tag = b64encode(tag).decode()
-        nonce = b64encode(cipher.nonce).decode()
-        salt = b64encode(salt).decode()
+        cipherpass, tag, nonce, salt = self.encrypt(master_password, new_password)
 
         with open(passordfil, "r") as f:
             lines = f.readlines()
