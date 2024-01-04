@@ -21,7 +21,7 @@ class MainWindow(QMainWindow):
         self.main_widget = QWidget()
         self.under_widget = QWidget()
         self.services = {}
-        self.item_window = None
+        self.item_window = QWidget()
         self.toolbar = None
 
         self.setWindowTitle("Passwordmanager")
@@ -211,6 +211,7 @@ class MainWindow(QMainWindow):
         QMessageBox.information(self, "Clipboard", "Password copied to clipboard!")
 
     def addItem(self):
+        self.item_window.close()
         self.item_window = AddItemWindow(self, self.KONTROLLER)
         self.item_window.show()
 
@@ -222,6 +223,7 @@ class MainWindow(QMainWindow):
         self.services = self.KONTROLLER.getNamesAndUsernames()
 
     def showDetails(self, service):
+        self.item_window.close()
         self.item_window = DetailsItemWindow(self, service, self.services[service], self.KONTROLLER.getPassword(service), self.KONTROLLER)
         self.item_window.show()
 

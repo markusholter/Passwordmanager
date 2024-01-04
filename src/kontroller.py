@@ -33,7 +33,7 @@ class Kontroller:
         return self.PA.getPassword(self.passordfil, self.master_password, name)
     
     def getNamesAndUsernames(self, s=""):
-       return self.PA.getNamesAndUsernames(self.passordfil, s)
+        return self.PA.getNamesAndUsernames(self.passordfil, s)
     
     def deleteItem(self, service):
         self.PA.deleteItem(self.passordfil, service)
