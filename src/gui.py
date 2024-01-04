@@ -352,11 +352,13 @@ class DetailsItemWindow(ItemWindow):
         new_password = self.password.text()
 
         if new_name != original_name:
-            print("service", self.main_window.KONTROLLER.editServicename(original_name, new_name))
+            self.main_window.KONTROLLER.editServicename(original_name, new_name)
         if new_username != original_username:
-            print("username", self.main_window.KONTROLLER.editUsername(new_name, new_username))
+            self.main_window.KONTROLLER.editUsername(new_name, new_username)
         if new_password != original_password:
-            print("password", self.main_window.KONTROLLER.editPassword(new_name, new_password))
+            self.main_window.KONTROLLER.editPassword(new_name, new_password)
+
+        self.main_window.services = self.main_window.KONTROLLER.getNamesAndUsernames()
 
         self.main_window.buildManager()
         self.close()
