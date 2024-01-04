@@ -43,7 +43,7 @@ class MainWindow(QMainWindow):
 
         register.clicked.connect(self.register)
         log_in.clicked.connect(self.log_in)
-        self.master_password_line.returnPressed.connect(self.log_in) # For at man skal kunne trykke enter fo å logge inn.
+        self.master_password_line.returnPressed.connect(self.log_in)
         self.user_line.returnPressed.connect(self.log_in)
 
 
@@ -136,6 +136,14 @@ class MainWindow(QMainWindow):
             i += 1
 
 
+    def setMaxByPercentage(self, w, h):
+        screen = QApplication.primaryScreen()
+        screenGeometry = screen.availableGeometry()
+        minw = int(screenGeometry.width() * w)
+        minh = int(screenGeometry.height() * h)
+        self.setMaximumSize(minw, minh)
+
+
     def register(self):
         user = self.user_line.text()
         master_password = self.master_password_line.text()
@@ -182,7 +190,7 @@ class MainWindow(QMainWindow):
         self.buildManager(s)
 
 
-    def mousePressEvent(self, a0: QMouseEvent | None) -> None: # For at den blå borderen rundt knapper skal forsvinne når man klikker et annet sted
+    def mousePressEvent(self, a0: QMouseEvent | None) -> None:
         if self.focusWidget():
             self.focusWidget().clearFocus()
         return super().mousePressEvent(a0)
@@ -253,7 +261,7 @@ class ItemWindow(QWidget):
             self.show_password.setText("Show password")
 
 
-    def mousePressEvent(self, a0: QMouseEvent | None) -> None: # For at den blå borderen rundt knapper skal forsvinne når man klikker et annet sted
+    def mousePressEvent(self, a0: QMouseEvent | None) -> None:
         if self.focusWidget():
             self.focusWidget().clearFocus()
         return super().mousePressEvent(a0)
