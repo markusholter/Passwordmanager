@@ -136,21 +136,6 @@ class MainWindow(QMainWindow):
             i += 1
 
 
-    def setMaxByPercentage(self, w, h):
-        screen = QApplication.primaryScreen()
-        screenGeometry = screen.availableGeometry()
-        minw = int(screenGeometry.width() * w)
-        minh = int(screenGeometry.height() * h)
-        self.setMaximumSize(minw, minh)
-
-    def setMinByPercentage(self, w, h):
-        screen = QApplication.primaryScreen()
-        screenGeometry = screen.availableGeometry()
-        minw = int(screenGeometry.width() * w)
-        minh = int(screenGeometry.height() * h)
-        self.setMinimumSize(minw, minh)
-
-
     def register(self):
         user = self.user_line.text()
         master_password = self.master_password_line.text()
