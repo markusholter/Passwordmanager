@@ -10,6 +10,8 @@ from PyQt6.QtGui import QMouseEvent, QFontMetrics
 from PyQt6.QtCore import Qt
 
 class MainWindow(QMainWindow):
+
+    # Initialize the window to the log in screen
     def __init__(self, kontroller):
         super().__init__()
         self.KONTROLLER: Kontroller = kontroller
@@ -25,6 +27,7 @@ class MainWindow(QMainWindow):
         self.setWindowTitle("Passwordmanager")
         self.setMaxByPercentage(0.3, 0.5)
 
+        # Make and add the labels and editable lines to the layout
         user_instruction = QLabel("Username:")
         self.my_layout.addWidget(user_instruction, 1, 1)
 
@@ -37,6 +40,7 @@ class MainWindow(QMainWindow):
         self.my_layout.addWidget(self.master_password_line, 2, 2)
 
 
+        # Make, configure and add a "register" and "log in" button to the layout
         buttons = QHBoxLayout()
         register = QPushButton("Register")
         log_in = QPushButton("Log in")
@@ -56,7 +60,7 @@ class MainWindow(QMainWindow):
 
         self.setCentralWidget(self.main_widget)
 
-
+    # Build main window again after succesful login
     def loggedIn(self):
         self.services = self.KONTROLLER.getNamesAndUsernames()
         self.toolbar = QToolBar("Toolbar")
@@ -65,6 +69,7 @@ class MainWindow(QMainWindow):
 
         self.toolbar.setMovable(False)
         
+        # Configure the toolbar with search an "add item" button
         add_item = QPushButton("Add item")
         add_item.clicked.connect(self.addItem)
         self.toolbar.addWidget(add_item)
@@ -80,7 +85,7 @@ class MainWindow(QMainWindow):
 
         self.addToolBar(self.toolbar)
 
-
+    # Build the main widget
     def buildManager(self, search=""):
         self.main_widget = QScrollArea()
         self.my_layout = QGridLayout(self.main_widget)
@@ -97,12 +102,13 @@ class MainWindow(QMainWindow):
         self.main_widget.setWidget(self.under_widget)
         self.setCentralWidget(self.main_widget)
 
-
+    # Lists all saved services for the user with buttons for details and password copy
     def listServices(self, services):
         i = 0
         for service in services:
             service_space = QVBoxLayout()
 
+            # Configure the service name label
             q_service = QLabel(service)
             q_service.setStyleSheet("font-size: 13pt;")
             q_service.setMaximumWidth(200)
@@ -112,6 +118,7 @@ class MainWindow(QMainWindow):
             q_service.setAlignment(Qt.AlignmentFlag.AlignBottom)
             service_space.addWidget(q_service)
 
+            # Configure username widget as LineEdit, so that it can be selected and copied
             username = QLineEdit(services[service])
             username.setStyleSheet("font-style: italic; background-color: transparent; border: 0px;")
             username.setMaximumWidth(200)
@@ -124,7 +131,7 @@ class MainWindow(QMainWindow):
 
             self.my_layout.addLayout(service_space, i, 0)
 
-
+            #Configure the buttons "Details" and "Copy password"
             show_details = QPushButton("Details")
             show_details.clicked.connect(partial(self.showDetails, q_service.text()))
             self.my_layout.addWidget(show_details, i, 1)
@@ -204,7 +211,7 @@ class MainWindow(QMainWindow):
         QMessageBox.information(self, "Clipboard", "Password copied to clipboard!")
 
     def addItem(self):
-        self.item_window = AddItemWindow(self)
+        self.item_window = AddItemWindow(self, self.KONTROLLER)
         self.item_window.show()
 
     def addPassword(self, name, username, new_password):
@@ -212,18 +219,19 @@ class MainWindow(QMainWindow):
         self.buildManager()
         self.item_window.close()
         self.item_window = QWidget()
-
+        self.services = self.KONTROLLER.getNamesAndUsernames()
 
     def showDetails(self, service):
-        self.item_window = DetailsItemWindow(self, service, self.services[service], self.KONTROLLER.getPassword(service))
+        self.item_window = DetailsItemWindow(self, service, self.services[service], self.KONTROLLER.getPassword(service), self.KONTROLLER)
         self.item_window.show()
 
 
 
 class ItemWindow(QWidget):
-    def __init__(self, main_window: MainWindow):
+    def __init__(self, main_window: MainWindow, kontroller: Kontroller):
         super().__init__()
         self.main_window = main_window
+        self.KONTROLLER = kontroller
         self.my_layout = QGridLayout()
         self.name = QLineEdit()
         self.username = QLineEdit()
@@ -268,8 +276,8 @@ class ItemWindow(QWidget):
 
 
 class AddItemWindow(ItemWindow):
-    def __init__(self, main_window: MainWindow):
-        super().__init__(main_window)
+    def __init__(self, main_window: MainWindow, kontroller):
+        super().__init__(main_window, kontroller)
         self.name.returnPressed.connect(self.done)
         self.username.returnPressed.connect(self.done)
         self.password.returnPressed.connect(self.done)
@@ -289,8 +297,8 @@ class AddItemWindow(ItemWindow):
 
 
 class DetailsItemWindow(ItemWindow):
-    def __init__(self, main_window, service, username, password):
-        super().__init__(main_window)
+    def __init__(self, main_window, service, username, password, kontroller):
+        super().__init__(main_window, kontroller)
         self.v_mini_button_layout = QVBoxLayout()
         self.h_mini_button_layout = QVBoxLayout()
         self.copy_password = QPushButton("Copy password")
@@ -345,20 +353,20 @@ class DetailsItemWindow(ItemWindow):
         new_password = self.password.text()
 
         if new_name != original_name:
-            self.main_window.KONTROLLER.editServicename(original_name, new_name)
+            self.KONTROLLER.editServicename(original_name, new_name)
         if new_username != original_username:
-            self.main_window.KONTROLLER.editUsername(new_name, new_username)
+            self.KONTROLLER.editUsername(new_name, new_username)
         if new_password != original_password:
-            self.main_window.KONTROLLER.editPassword(new_name, new_password)
+            self.KONTROLLER.editPassword(new_name, new_password)
 
-        self.main_window.services = self.main_window.KONTROLLER.getNamesAndUsernames()
+        self.main_window.services = self.KONTROLLER.getNamesAndUsernames()
 
         self.main_window.buildManager()
         self.close()
         
 
     def delete(self):
-        self.main_window.KONTROLLER.deleteItem(self.name.text())
+        self.KONTROLLER.deleteItem(self.name.text())
         self.main_window.buildManager()
         self.close()
         
