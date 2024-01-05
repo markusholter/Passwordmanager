@@ -14,6 +14,8 @@ class MainWindow(QMainWindow):
     # Initialize the window to the log in screen
     def __init__(self, kontroller):
         super().__init__()
+
+        # Initialize all variables that will be saved to self
         self.KONTROLLER: Kontroller = kontroller
         self.my_layout = QGridLayout()
         self.user_line = QLineEdit()
@@ -58,6 +60,7 @@ class MainWindow(QMainWindow):
 
         self.main_widget.setLayout(self.my_layout)
 
+        # Add the main widget to the window
         self.setCentralWidget(self.main_widget)
 
     # Build main window again after succesful login
@@ -142,7 +145,7 @@ class MainWindow(QMainWindow):
 
             i += 1
 
-
+    # Set the max window size in relation to screen size
     def setMaxByPercentage(self, w, h):
         screen = QApplication.primaryScreen()
         screenGeometry = screen.availableGeometry()
@@ -179,7 +182,7 @@ class MainWindow(QMainWindow):
 
         self.loggedIn()
 
-
+    # Add or edit the message at the log in screen
     def addLoginMessage(self, string, error=False):
         message = self.my_layout.itemAtPosition(0, 2)
         if message:
@@ -210,28 +213,31 @@ class MainWindow(QMainWindow):
 
         QMessageBox.information(self, "Clipboard", "Password copied to clipboard!")
 
+    # Initialize a new window to add an Item
     def addItem(self):
         self.item_window.close()
         self.item_window = AddItemWindow(self, self.KONTROLLER)
         self.item_window.show()
 
+    # Close the secondary window and add the new Item
     def addPassword(self, name, username, new_password):
         self.KONTROLLER.addPassword(name, username, new_password)
         self.buildManager()
-        self.item_window.close()
-        self.item_window = QWidget()
         self.services = self.KONTROLLER.getNamesAndUsernames()
 
+    # Initialize a new window for details and editing
     def showDetails(self, service):
         self.item_window.close()
         self.item_window = DetailsItemWindow(self, service, self.services[service], self.KONTROLLER.getPassword(service), self.KONTROLLER)
         self.item_window.show()
 
 
-
+# An abstract class with the common UI of addItemWindow and DetailsItemWindow 
 class ItemWindow(QWidget):
     def __init__(self, main_window: MainWindow, kontroller: Kontroller):
         super().__init__()
+
+        # Initialize all variables that will be saved to self
         self.main_window = main_window
         self.KONTROLLER = kontroller
         self.my_layout = QGridLayout()
@@ -241,10 +247,10 @@ class ItemWindow(QWidget):
         self.button_layout = QHBoxLayout()
         self.show_password = QPushButton("Show password")
 
+        # Make and add all labels to the layout
         name_label = QLabel("Service: ")
         self.my_layout.addWidget(name_label, 0, 0)
         self.my_layout.addWidget(self.name, 0, 1)
-
 
         username_label = QLabel("Username: ")
         self.my_layout.addWidget(username_label, 1, 0)
@@ -257,9 +263,10 @@ class ItemWindow(QWidget):
 
         self.my_layout.addLayout(self.button_layout, 3, 1)
 
+        # Add layout to the window
         self.setLayout(self.my_layout)
 
-
+    # Change between showing and hiding the password
     def showPassword(self):
         self.show_password.setFixedSize(self.show_password.size())
 
@@ -276,14 +283,17 @@ class ItemWindow(QWidget):
             self.focusWidget().clearFocus()
         return super().mousePressEvent(a0)
 
-
+# Window for adding items
 class AddItemWindow(ItemWindow):
     def __init__(self, main_window: MainWindow, kontroller):
         super().__init__(main_window, kontroller)
+
+        # Connect the action of pressing "Enter" to being done
         self.name.returnPressed.connect(self.done)
         self.username.returnPressed.connect(self.done)
         self.password.returnPressed.connect(self.done)
 
+        # Configure buttons
         self.show_password.clicked.connect(self.showPassword)
         self.button_layout.addWidget(self.show_password)
 
@@ -291,13 +301,15 @@ class AddItemWindow(ItemWindow):
         done.clicked.connect(self.done)
         self.button_layout.addWidget(done)
 
+    # Save new item and close window
     def done(self):
         name = self.name.text()
         username = self.username.text()
         password = self.password.text()
         self.main_window.addPassword(name, username, password)
+        self.close()
 
-
+# Window for showing details and editing items
 class DetailsItemWindow(ItemWindow):
     def __init__(self, main_window, service, username, password, kontroller):
         super().__init__(main_window, kontroller)
@@ -307,6 +319,7 @@ class DetailsItemWindow(ItemWindow):
         self.delete_button = QPushButton("Delete")
         self.edit_button = QPushButton("Edit")
 
+        # Configure and add buttons to button layouts
         self.show_password.clicked.connect(self.showPassword)
         self.v_mini_button_layout.addWidget(self.show_password)
 
@@ -322,6 +335,7 @@ class DetailsItemWindow(ItemWindow):
         self.delete_button.clicked.connect(self.delete)
         self.button_layout.addLayout(self.h_mini_button_layout)
 
+        # Set the lines to show the data and to read only
         self.name.setText(service)
         self.name.setReadOnly(True)
 
@@ -335,20 +349,26 @@ class DetailsItemWindow(ItemWindow):
     def copyPassword(self, service):
         self.main_window.copyPassword(service)
 
+    # Reconfigure window to allow for editing details
     def edit(self):
+
+        # Remove buttons unnecessary for editing
         self.v_mini_button_layout.removeWidget(self.edit_button)
         self.edit_button.deleteLater()
         self.h_mini_button_layout.removeWidget(self.delete_button)
         self.delete_button.deleteLater()
         
+        # Make lines editable
         self.name.setReadOnly(False)
         self.username.setReadOnly(False)
         self.password.setReadOnly(False)
 
+        # Configure "Done"-button at the place of "Copy_password"
         self.copy_password.setText("Done")
         self.copy_password.clicked.disconnect()
         self.copy_password.clicked.connect(partial(self.done, self.name.text(), self.username.text(), self.password.text()))
 
+    # Save changed details and close window
     def done(self, original_name, original_username, original_password):
         new_name = self.name.text()
         new_username = self.username.text()
