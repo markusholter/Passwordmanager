@@ -21,6 +21,9 @@ class Brukeradministrasjon:
         return False
 
     def checkIfTaken(self, brukerfil, user):
+        if not os.path.exists(brukerfil):
+            return False
+        
         with open(brukerfil, "r") as f:
             usernames = [line.strip().split(",")[0] for line in f.readlines()[1:]]
         return user in usernames

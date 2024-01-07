@@ -63,7 +63,7 @@ class Passordadministrasjon:
 
     def getNamesAndUsernames(self, passordfil, search) -> dict:
         if not os.path.exists(passordfil):
-            return None
+            return {}
         names = {}
 
         with open(passordfil, "r") as f:
